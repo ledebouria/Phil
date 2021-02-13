@@ -101,7 +101,7 @@ function removeWordlistDuplicates() {
   }
 }
 
-function matchFromWordlist(word) {
+function matchFromWordlist(word, firstonly = false) {
   const l = word.length;
   const actualLettersInWord = word.replace(/-/g, "").length;
   if (actualLettersInWord >= 1 && actualLettersInWord < l) { // Only search if word isn't completely blank or filled
@@ -110,7 +110,11 @@ function matchFromWordlist(word) {
     let matches = [];
     for (let i = 0; i < wordlist[l].length; i++) {
       if (wordlist[l][i].search(pattern) > -1) {
-        matches.push(wordlist[l][i]);
+        matches.push(wordlist[l][i]);      
+        if (firstonly == true)
+        {
+          return matches;
+        }
       }
     }
     return matches;
@@ -162,6 +166,10 @@ function matchWordStrict(square, direction, isFirstCall) {
   return matches;
 }
 
+String.prototype.replaceAt = function(index, replacement) {
+  return this.substr(0, index) + replacement + this.substr(index + replacement.length);
+}
+
 function updateMatchesUI() {
   let acrossMatchList = document.getElementById("across-matches");
   let downMatchList = document.getElementById("down-matches");
@@ -187,6 +195,10 @@ function updateMatchesUI() {
     li.innerHTML = match;
     li.className = "";
     // li.addEventListener('click', printScore);
+    var tmpWord = current.downWord.replaceAt(current.row, acrossMatches[i][current.col]);
+    if(matchFromWordlist(tmpWord, true).length > 0) {
+      li.className = "bold";
+    }
     li.addEventListener('dblclick', fillGridWithMatch);
     acrossMatchList.appendChild(li);
     let alphabetIndex = alphabet.indexOf(match[acrossIndex]);
@@ -204,6 +216,10 @@ function updateMatchesUI() {
     let li = document.createElement("LI");
     li.innerHTML = match;
     li.className = "";
+    var tmpWord = current.acrossWord.replaceAt(current.col, downMatches[i][current.row]);
+    if(matchFromWordlist(tmpWord, true).length > 0) {
+      li.className = "bold";
+    }
     li.addEventListener('dblclick', fillGridWithMatch);
     downMatchList.appendChild(li);
     let alphabetIndex = alphabet.indexOf(match[downIndex]);
